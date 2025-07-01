@@ -2,7 +2,7 @@ from game import create_screen
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap, QTransform
-from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QMainWindow, QPushButton, QSizePolicy, QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QLabel, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QWidget, QVBoxLayout
 
 def create_placing_screen(mainWindow : QMainWindow):
     ships = [5, 4, 3, 3, 2]
@@ -72,39 +72,40 @@ def grid_clicked(mainWindow, button : QPushButton, ships, shipNames):
 def place_ship(mainWindow : QMainWindow, x, y, ships):
     if (mainWindow.placingRotation):
         if (y + ships[mainWindow.placingIndex] - 1 > 9):
-            print("bottom out of bounds")
-            ## TODO: learn how to add error popup
+            show_popup(mainWindow, "Bottom Out Of Bounds", "You attempted to place this ship out of bounds.")
             return
         else: 
             mainWindow.playerBoardArray[y][x] = "T"
             for i in range(1, ships[mainWindow.placingIndex] - 1):
-                if (mainWindow.playerBoardArray[y + i][x] == "_"):
-                    mainWindow.playerBoardArray[y + i][x] = "V"
-                else:
-                    print("attempted to place on top of already-placed ship - V")
+                if (mainWindow.playerBoardArray[y + i][x] != "_"):
+                    mainWindow.playerBoardArray[y][x] = "_"
+                    show_popup(mainWindow, "Overlaps With Existing Ship - Vertical", "You attempted to place this ship on top of a previously placed ship.")
                     return
-            if (mainWindow.playerBoardArray[y + ships[mainWindow.placingIndex] - 1][x] == "_"):
-                mainWindow.playerBoardArray[y + ships[mainWindow.placingIndex] - 1][x] = "B"
-            else: 
-                print("attempted to place on top of already-placed ship - V Last") 
+            if (mainWindow.playerBoardArray[y + ships[mainWindow.placingIndex] - 1][x] != "_"): 
+                mainWindow.playerBoardArray[y][x] = "_"
+                show_popup(mainWindow, "Overlaps With Existing Ship - Vertical Final", "You attempted to place this ship on top of a previously placed ship.") 
                 return
+            for i in range(1, ships[mainWindow.placingIndex] - 1):
+                mainWindow.playerBoardArray[y + i][x] = "V"
+            mainWindow.playerBoardArray[y + ships[mainWindow.placingIndex] - 1][x] = "B"
     else:
         if (x + ships[mainWindow.placingIndex] - 1 > 9):
-            print("right side out of bounds")
+            show_popup(mainWindow, "Right Side Out Of Bounds", "You attempted to place this ship out of bounds.")
             return
         else:
             mainWindow.playerBoardArray[y][x] = "L"
             for i in range(1, ships[mainWindow.placingIndex] - 1): 
-                if (mainWindow.playerBoardArray[y][x + i] == "_"):
-                    mainWindow.playerBoardArray[y][x + i] = "H"
-                else: 
-                    print("attempted to place on top of already-placed ship - H")
+                if (mainWindow.playerBoardArray[y][x + i] != "_"):
+                    mainWindow.playerBoardArray[y][x] = "_"
+                    show_popup(mainWindow, "Overlaps With Existing Ship - Horizontal", "You attempted to place this ship on top of a previously placed ship.")
                     return
-            if (mainWindow.playerBoardArray[y][x + ships[mainWindow.placingIndex] - 1] == "_"):
-                mainWindow.playerBoardArray[y][x + ships[mainWindow.placingIndex] - 1] = "R"
-            else: 
-                print("attempted to place on top of already-placed ship - H Last") 
+            if (mainWindow.playerBoardArray[y][x + ships[mainWindow.placingIndex] - 1] != "_"):
+                mainWindow.playerBoardArray[y][x] = "_"
+                show_popup(mainWindow, "Overlaps With Existing Ship - Horizontal Final", "You attempted to place this ship on top of a previously placed ship.") 
                 return
+            for i in range(1, ships[mainWindow.placingIndex] - 1):
+                mainWindow.playerBoardArray[y][x + i] = "H"
+            mainWindow.playerBoardArray[y][x + ships[mainWindow.placingIndex] - 1] = "R"
     mainWindow.placingIndex += 1
     update_display(mainWindow)
 
@@ -150,3 +151,11 @@ def getPixmaps():
 
     pixmaps["X"] = QPixmap('C:/mandy/myPython/battleship/hit.png')
     return pixmaps
+
+def show_popup(parent, e, message):
+    msg_box = QMessageBox(parent)
+    msg_box.setIcon(QMessageBox.Icon.Information)
+    msg_box.setWindowTitle("Error: " + e)
+    msg_box.setText(message + " Try again.")
+    msg_box.setStandardButtons(QMessageBox.StandardButton.Ok)
+    msg_box.exec()  

@@ -58,7 +58,7 @@ currentHit = False
 ## TODO: FIX THIS
 def computer_tracking_shot(mainWindow : QMainWindow):
     global trackingOn, trackingHit, prevShot, prevHit, directionsChecked, currentDirection, currentHit
-    if (trackingOn): ## targeting turning off early?
+    if (trackingOn):
         prevHit = currentHit
         if (currentDirection == 0): 
             prevShot = (prevShot[0] + 1, prevShot[1])
@@ -74,7 +74,7 @@ def computer_tracking_shot(mainWindow : QMainWindow):
             currentHit = shoot_player_board(mainWindow, prevShot[0], prevShot[1])
         if (currentHit[0] == 10):
             directionsChecked[currentDirection] = True
-            if (all(directionsChecked) or (prevHit and directionsChecked[0] and directionsChecked[2]) or (prevHit and directionsChecked[1] and directionsChecked[3])):
+            if (all(directionsChecked) or (prevHit and ((directionsChecked[0] and directionsChecked[2]) or (directionsChecked[1] and directionsChecked[3])))):
                 trackingOn = False
                 directionsChecked = [False for i in range(4)]
                 return
@@ -83,7 +83,7 @@ def computer_tracking_shot(mainWindow : QMainWindow):
             else:
                 while (directionsChecked[currentDirection]):
                     currentDirection = (currentDirection + random.randint(1, 3)) % 4
-            prevShot = (trackingHit[0], trackingHit[1])
+            prevShot = (trackingHit[0], trackingHit[1]) ## I don't think this is resetting properly?
     else: 
         hit = computer_random_shot(mainWindow)
         if (hit[0] != 10):
